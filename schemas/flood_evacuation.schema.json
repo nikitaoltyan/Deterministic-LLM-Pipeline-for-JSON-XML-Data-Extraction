@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FloodEvacuationRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "time",
+    "water_level_rise",
+    "rise_speed",
+    "resident_count",
+    "evacuation_start_time"
+  ],
+  "properties": {
+    "time": {
+      "type": "string",
+      "description": "Observed or reported time."
+    },
+    "water_level_rise": {
+      "type": "integer",
+      "description": "Water rise level as integer value."
+    },
+    "rise_speed": {
+      "type": "integer",
+      "description": "Water rise speed as integer value."
+    },
+    "resident_count": {
+      "type": "integer",
+      "description": "Number of residents as integer value."
+    },
+    "evacuation_start_time": {
+      "type": "string",
+      "description": "Planned or actual evacuation start time."
+    }
+  }
+}

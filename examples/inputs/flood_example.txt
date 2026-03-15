@@ -1,0 +1,4 @@
+At 14:30 the water level rose by 120 units.
+The rise speed reached 8 units per hour.
+There are 540 residents in the affected zone.
+Evacuation starts at 16:00.

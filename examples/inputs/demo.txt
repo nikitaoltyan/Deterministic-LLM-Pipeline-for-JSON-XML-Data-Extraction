@@ -1,0 +1,3 @@
+Demo source text.
+
+This is a placeholder corpus sample for the first deterministic MVP.

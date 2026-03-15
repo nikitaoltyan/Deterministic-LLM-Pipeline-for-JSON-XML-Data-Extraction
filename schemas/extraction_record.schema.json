@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ExtractionRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "summary", "priority", "published"],
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "integer"
+    },
+    "published": {
+      "type": "boolean"
+    },
+    "tags": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

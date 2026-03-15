@@ -1,0 +1,22 @@
+{
+  "schema_id": "extraction-record-v1",
+  "schema_path": "schemas/extraction_record.schema.json",
+  "provider": {
+    "name": "mock",
+    "model": "mock-json-generator-v1"
+  },
+  "repair_policy": {
+    "max_iterations": 1,
+    "drop_unknown_fields": true,
+    "normalize_scalar_strings": true,
+    "apply_schema_defaults": true
+  },
+  "trace_policy": {
+    "write_trace": true,
+    "trace_dir": "traces",
+    "report_dir": "reports",
+    "manifest_dir": "manifests"
+  },
+  "input_id": "demo-run",
+  "mock_response_path": "fixtures/mock_generation_valid.json"
+}

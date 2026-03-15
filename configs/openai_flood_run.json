@@ -1,0 +1,29 @@
+{
+  "schema_id": "flood-evacuation-v1",
+  "schema_path": "schemas/flood_evacuation.schema.json",
+  "provider": {
+    "name": "openai_compatible",
+    "model": "gpt-4.1-mini",
+    "api_base_url": "https://api.openai.com/v1",
+    "api_key_env": "OPENAI_API_KEY",
+    "request_timeout_seconds": 60,
+    "use_json_response_format": true
+  },
+  "decoding": {
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "max_output_tokens": 512
+  },
+  "repair_policy": {
+    "max_iterations": 1,
+    "drop_unknown_fields": true,
+    "normalize_scalar_strings": true,
+    "apply_schema_defaults": true
+  },
+  "trace_policy": {
+    "write_trace": true,
+    "trace_dir": "traces",
+    "report_dir": "reports"
+  },
+  "input_id": "flood-live-run"
+}

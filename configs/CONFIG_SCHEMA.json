@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RunConfig",
+  "type": "object",
+  "required": ["schema_id", "schema_path", "provider", "input_id"],
+  "properties": {
+    "schema_id": {
+      "type": "string"
+    },
+    "schema_path": {
+      "type": "string"
+    },
+    "provider": {
+      "type": "object",
+      "required": ["name", "model"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "api_base_url": {
+          "type": ["string", "null"]
+        },
+        "api_key_env": {
+          "type": ["string", "null"]
+        },
+        "request_timeout_seconds": {
+          "type": "integer"
+        },
+        "use_json_response_format": {
+          "type": "boolean"
+        },
+        "structured_output_strategy": {
+          "type": "string"
+        }
+      }
+    },
+    "input_id": {
+      "type": "string"
+    },
+    "mock_response_path": {
+      "type": ["string", "null"]
+    },
+    "trace_policy": {
+      "type": "object",
+      "properties": {
+        "write_trace": {
+          "type": "boolean"
+        },
+        "trace_dir": {
+          "type": "string"
+        },
+        "report_dir": {
+          "type": "string"
+        },
+        "manifest_dir": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
