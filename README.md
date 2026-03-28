@@ -1,14 +1,25 @@
 # Deterministic LLM Structuring Pipeline
 
-Research-grade project for deterministic transformation of unstructured text into strictly valid structured JSON and typed application objects.
+Research-grade project for deterministic transformation of unstructured text into strictly valid structured representations and typed application objects.
 
 ## Status
 
-The project has an implemented MVP vertical slice with a deterministic local pipeline and a mock provider adapter.
+The project has an implemented JSON-track MVP and a format-neutral core orchestration layer with:
+
+- format-aware run configuration
+- format runtime registry for parser, validator, repair, canonicalization, and typing strategies
+- deterministic local pipeline execution
+- mock provider adapter
+- openai-compatible live adapter
+- schema-derived grammar layer
+- reproducibility layer with manifests and run fingerprints
+- artifact registry for formal pipeline artifacts
 
 ## Scope of MVP
 
-- Output format: JSON only
+- Output formats:
+  - implemented: JSON
+  - planned through the generalized core: XML
 - Runtime: Python 3.12
 - Interfaces: library + CLI
 - LLM access: remote API adapters
@@ -17,7 +28,7 @@ The project has an implemented MVP vertical slice with a deterministic local pip
 
 ## Core invariants
 
-- `I1`: syntactic JSON validity
+- `I1`: syntactic structured-output validity
 - `I2`: schema validity
 - `I3`: strict typing
 - `I4`: determinism under fixed environment configuration
@@ -54,6 +65,15 @@ Local verification completed:
 - mock CLI path verified successfully
 
 Live external API verification is now supported by the codebase, but still must be run by the user with a real API key because network execution is not available in the current agent environment.
+
+## Git workflow
+
+Project development now follows this repository rule:
+
+- after each completed development step, create a descriptive git commit
+- do not push automatically after a milestone
+- push to the GitHub remote only after an explicit user instruction
+- before finishing the step, synchronize markdown documentation with the implementation
 
 Reproducibility layer now includes:
 

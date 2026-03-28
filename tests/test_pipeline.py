@@ -17,6 +17,8 @@ def test_pipeline_end_to_end_success() -> None:
     result = Pipeline().run(text, config)
 
     assert result.ok is True
+    assert result.output_format == "json"
+    assert result.canonical_text == (PROJECT_ROOT / "goldens" / "demo.golden.json").read_text(encoding="utf-8").strip()
     assert result.canonical_json == (PROJECT_ROOT / "goldens" / "demo.golden.json").read_text(encoding="utf-8").strip()
     assert result.typed_document == {
         "title": "Demo title",
@@ -40,6 +42,8 @@ def test_pipeline_is_deterministic_for_same_input() -> None:
     first = Pipeline().run(text, config)
     second = Pipeline().run(text, config)
 
+    assert first.output_format == second.output_format == "json"
+    assert first.canonical_text == second.canonical_text
     assert first.canonical_json == second.canonical_json
     assert first.typed_document == second.typed_document
     assert first.run_fingerprint == second.run_fingerprint

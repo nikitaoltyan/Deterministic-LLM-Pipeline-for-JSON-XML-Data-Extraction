@@ -52,7 +52,8 @@ class RepairResult:
 @dataclass(frozen=True)
 class PipelineResult:
     ok: bool
-    canonical_json: Optional[str]
+    output_format: str
+    canonical_text: Optional[str]
     typed_document: Optional[dict[str, Any]]
     issues: list[ValidationIssue]
     repairs: list[RepairAction]
@@ -60,3 +61,9 @@ class PipelineResult:
     report_path: Optional[str]
     manifest_path: Optional[str]
     run_fingerprint: Optional[str]
+
+    @property
+    def canonical_json(self) -> Optional[str]:
+        if self.output_format == "json":
+            return self.canonical_text
+        return None

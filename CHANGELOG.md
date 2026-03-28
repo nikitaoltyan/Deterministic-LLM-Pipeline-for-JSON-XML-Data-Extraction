@@ -18,3 +18,18 @@
 - Added artifact registry layer for schema, grammar, prompt template, repair policy, and canonicalization policy.
 - Embedded resolved artifact bundle snapshot into the run manifest.
 - Added registry-aware tests and verified the code locally with tests: `8 passed`.
+
+## 2026-03-15
+
+- Added project git workflow rule: commit after each completed development step and push after each major milestone.
+- Synchronized core markdown documents with the current implementation stage.
+- Updated working frame, user instruction, test plan, and architecture status to reflect grammar layer, reproducibility layer, and artifact registry.
+
+## 2026-03-28
+
+- Completed Stage 1 of the extension roadmap: generalized the core pipeline contracts toward format-neutral orchestration.
+- Added explicit `output_format` to run configuration and serialized `Omega`.
+- Introduced runtime strategy abstractions for parsing, validation, repair, canonicalization, and strict typing.
+- Added JSON strategy implementations behind the new format runtime registry.
+- Refactored pipeline, tracing, and CLI to use format-neutral result fields with JSON backward compatibility retained through `canonical_json`.
+- Updated configs and tests to reflect the format-aware orchestration layer while preserving the current JSON-track baseline.

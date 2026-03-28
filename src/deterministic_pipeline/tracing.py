@@ -91,6 +91,8 @@ def write_trace_report_and_manifest(
         "issues": [issue.__dict__ for issue in issues],
         "repairs": [repair.__dict__ for repair in repairs],
         "result_ok": result.ok,
+        "output_format": result.output_format,
+        "canonical_text": result.canonical_text,
         "canonical_json": result.canonical_json,
     }
     report_data = {

@@ -4,6 +4,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Optional, Tuple
 
+from deterministic_pipeline.formats import StructuredFormat
+
 
 @dataclass(frozen=True)
 class DecodingConfig:
@@ -59,6 +61,7 @@ class ProviderConfig:
 class RunConfig:
     schema_id: str
     schema_path: Path
+    output_format: StructuredFormat = StructuredFormat.JSON
     provider: ProviderConfig = field(default_factory=ProviderConfig)
     decoding: DecodingConfig = field(default_factory=DecodingConfig)
     repair_policy: RepairPolicy = field(default_factory=RepairPolicy)
@@ -75,6 +78,7 @@ class RunConfig:
         return {
             "schema_id": self.schema_id,
             "schema_path": str(self.schema_path),
+            "output_format": self.output_format.value,
             "provider": self.provider.as_json(),
             "decoding": self.decoding.as_json(),
             "repair_policy": self.repair_policy.as_json(),
@@ -111,6 +115,7 @@ def load_run_config(path: Path) -> RunConfig:
     return RunConfig(
         schema_id=data["schema_id"],
         schema_path=Path(data["schema_path"]),
+        output_format=StructuredFormat(data.get("output_format", StructuredFormat.JSON.value)),
         provider=ProviderConfig(**provider_data),
         decoding=DecodingConfig(**decoding_data),
         repair_policy=RepairPolicy(**repair_data),

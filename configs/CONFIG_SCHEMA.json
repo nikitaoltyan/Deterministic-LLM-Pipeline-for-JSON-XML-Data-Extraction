@@ -10,6 +10,10 @@
     "schema_path": {
       "type": "string"
     },
+    "output_format": {
+      "type": "string",
+      "enum": ["json", "xml"]
+    },
     "provider": {
       "type": "object",
       "required": ["name", "model"],

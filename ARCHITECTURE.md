@@ -1,6 +1,6 @@
-# Proposed Architecture
+# Architecture
 
-This document is a proposal and requires user approval before implementation.
+This document reflects the approved architecture, the currently implemented JSON-track baseline, and the first-stage generalization of the core pipeline contracts.
 
 ## Architectural summary
 
@@ -9,6 +9,18 @@ The system is a deterministic pipeline:
 `TextInput -> Preprocess -> PromptBuild -> GenerateCandidate -> FormalGate -> Validate -> Repair -> Canonicalize -> Type -> Report`
 
 The LLM is treated as a candidate generator only. Correctness is enforced by deterministic post-generation mechanisms and explicit formal artifacts.
+
+The orchestration layer is now format-neutral at the contract level:
+
+- `RunConfig` carries an explicit `output_format`
+- the pipeline resolves a `FormatRuntime`
+- parsing, validation, repair, canonicalization, and typing are delegated to format-specific strategies
+
+Current implementation status:
+
+- generalized core contracts implemented
+- JSON strategy implementations implemented
+- XML declared as a target format identifier, but not implemented yet
 
 ## Chosen formal-constraint strategy
 
@@ -88,7 +100,7 @@ Invariants:
 ### 5. Formal gate
 
 Responsibility:
-- Parse raw output as JSON, apply grammar/schema-derived acceptance checks, reject malformed output early
+- Parse raw output using the active format strategy, apply grammar/schema-derived acceptance checks, reject malformed output early
 
 Inputs:
 - `RawGeneration`, grammar artifact, schema artifact
@@ -102,7 +114,7 @@ Invariants:
 ### 6. Schema validator
 
 Responsibility:
-- Validate JSON against versioned JSON Schema
+- Validate the candidate document against the active formal schema model
 
 Inputs:
 - `CandidateDocument`, schema artifact
@@ -141,7 +153,7 @@ Invariants:
 ### 8. Canonicalizer
 
 Responsibility:
-- Produce byte-stable JSON serialization
+- Produce byte-stable canonical serialization for the active output format
 
 Canonicalization rules:
 - stable key ordering
@@ -151,7 +163,7 @@ Canonicalization rules:
 - fixed date/time normalization rules once date types are introduced
 
 Outputs:
-- canonical JSON bytes
+- canonical serialized representation
 
 Invariants:
 - Directly enforces `I4`; stabilizes outputs after `I1` and `I2`
@@ -159,7 +171,7 @@ Invariants:
 ### 9. Type layer
 
 Responsibility:
-- Map canonical validated JSON into strict application types
+- Map canonical validated structured data into strict application types
 
 Inputs:
 - canonical JSON document, type spec
@@ -191,7 +203,7 @@ Invariants:
 6. Parse and formally gate output
 7. Validate against JSON Schema
 8. If needed, run bounded deterministic repair and validate again
-9. Canonicalize valid JSON
+9. Canonicalize the valid structured document
 10. Convert to strict typed model
 11. Persist report, trace, artifacts, and final result
 
@@ -201,6 +213,15 @@ Invariants:
 
 ```python
 Pipeline.run(text: str, run_config: RunConfig) -> PipelineResult
+```
+
+The result contract is now format-neutral:
+
+```python
+PipelineResult.ok: bool
+PipelineResult.output_format: str
+PipelineResult.canonical_text: str | None
+PipelineResult.typed_document: dict | None
 ```
 
 ### Provider adapter contract
@@ -225,6 +246,7 @@ RepairEngine.repair(candidate: dict, errors: list[ValidationError], policy: Repa
 
 `Omega` must include:
 
+- output format
 - provider name
 - model identifier and version
 - decoding parameters

@@ -24,17 +24,19 @@ def main() -> int:
     text = Path(args.input).read_text(encoding="utf-8")
     result = Pipeline().run(text, run_config)
 
-    if args.output and result.canonical_json is not None:
-        Path(args.output).write_text(result.canonical_json + "\n", encoding="utf-8")
+    if args.output and result.canonical_text is not None:
+        Path(args.output).write_text(result.canonical_text + "\n", encoding="utf-8")
 
     payload = {
         "ok": result.ok,
+        "output_format": result.output_format,
         "issues": [issue.__dict__ for issue in result.issues],
         "repairs": [repair.__dict__ for repair in result.repairs],
         "trace_path": result.trace_path,
         "report_path": result.report_path,
         "manifest_path": result.manifest_path,
         "run_fingerprint": result.run_fingerprint,
+        "canonical_text": result.canonical_text,
         "canonical_json": result.canonical_json,
     }
     print(json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2))

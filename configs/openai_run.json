@@ -1,6 +1,7 @@
 {
   "schema_id": "extraction-record-v1",
   "schema_path": "schemas/extraction_record.schema.json",
+  "output_format": "json",
   "provider": {
     "name": "openai_compatible",
     "model": "gpt-4.1-mini",
