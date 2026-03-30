@@ -18,6 +18,7 @@ Implemented tests currently cover:
 - explicit failure on unsupported union/composition schema constructs
 - provider capability profile resolution
 - deterministic structured-output strategy resolution
+- provider registry-backed adapter construction
 - openai-compatible provider contract request building
 - missing API key handling
 - artifact registry bundle resolution
@@ -34,6 +35,7 @@ Current local baseline:
 - format runtime resolution
 - provider capability resolution
 - structured-output strategy resolution
+- provider registry resolution
 - prompt building determinism
 - schema validation behavior
 - repair rule determinism

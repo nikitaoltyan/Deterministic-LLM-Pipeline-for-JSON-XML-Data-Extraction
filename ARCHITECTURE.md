@@ -39,6 +39,7 @@ This choice is the most academically defensible and reproducible for the current
 Implementation status:
 - implemented as separate normalized-schema and grammar artifact builders plus a provider-contract layer
 - current provider integration is split into:
+  - provider registry
   - provider capability profiles
   - deterministic structured-output strategy resolution
   - transport adapters
@@ -121,6 +122,16 @@ Outputs:
 
 Invariants:
 - Supports `I4` by making all provider parameters explicit and logged
+
+### 4c. Provider registry
+
+Responsibility:
+- Resolve provider names into concrete adapter factories
+- Isolate provider construction from pipeline orchestration
+
+Current implementation:
+- explicit registry-backed construction for `mock`
+- explicit registry-backed construction for `openai_compatible`
 
 ### 4a. Provider capability model
 

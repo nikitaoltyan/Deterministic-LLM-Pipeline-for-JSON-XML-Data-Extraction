@@ -6,6 +6,7 @@
 - The currently implemented strategy set is JSON-only, but the contract layer now reserves `xml` as a first-class target format identifier for later implementation.
 - The grammar layer is now implemented as a normalized schema compiler that emits provider-specific structured output contracts.
 - The normalized schema artifact and grammar artifact are now built through separate explicit builder steps, which prepares the codebase for later capability modeling and strategy resolution.
+- Provider creation is now routed through an explicit registry rather than hardcoded branching in the factory path.
 - Provider capabilities are now represented explicitly rather than inferred indirectly inside provider adapters.
 - Structured-output strategy resolution is now handled by a separate deterministic resolver instead of being embedded in transport code.
 - The normalized JSON schema subset now supports nullable fields, enums, nested objects, arrays, and selected scalar and collection constraints.

@@ -46,3 +46,8 @@
 - Completed Stage 3, substep 2: introduced explicit provider capability profiles for `mock` and `openai_compatible`.
 - Completed Stage 3, substep 3: extracted deterministic structured-output strategy resolution into a standalone resolver and simplified provider transport logic.
 - Added tests for provider capabilities, structured-output strategy resolution, and the updated provider request path.
+
+## 2026-03-30 Stage 4 In Progress
+
+- Completed Stage 4, substep 1: introduced an explicit provider registry for adapter construction and removed hardcoded provider selection from the factory path.
+- Added registry tests for registered providers and unknown-provider failure handling.

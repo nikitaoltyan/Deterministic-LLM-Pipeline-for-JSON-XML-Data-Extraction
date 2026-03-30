@@ -129,8 +129,6 @@ def _extract_message_text(response_data: dict) -> str:
 
 
 def make_provider(provider_config: ProviderConfig, mock_response_path: Optional[Path] = None) -> ProviderAdapter:
-    if provider_config.name == "mock":
-        return MockProviderAdapter(mock_response_path=mock_response_path)
-    if provider_config.name == "openai_compatible":
-        return OpenAICompatibleAdapter(provider_config)
-    raise ValueError("Unsupported provider: {0}".format(provider_config.name))
+    from deterministic_pipeline.provider_registry import build_default_provider_registry
+
+    return build_default_provider_registry().create(provider_config, mock_response_path=mock_response_path)
