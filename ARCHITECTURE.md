@@ -133,6 +133,7 @@ Current implementation:
 - explicit registry-backed construction for `mock`
 - explicit registry-backed construction for `openai_compatible`
 - explicit registry-backed construction for `anthropic_compatible`
+- shared transport helper functions for HTTP POST execution, API key resolution, structured-output resolution, and provider metadata assembly
 
 ### 4a. Provider capability model
 

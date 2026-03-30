@@ -52,13 +52,10 @@ class OpenAICompatibleAdapter(ProviderAdapter):
         self._provider_config = provider_config
 
     def generate(self, request: GenerationRequest) -> RawGeneration:
-        api_key_env = self._provider_config.api_key_env or "OPENAI_API_KEY"
-        api_key = os.environ.get(api_key_env)
-        if not api_key:
-            raise RuntimeError("Missing API key environment variable: {0}".format(api_key_env))
-
+        api_key = _require_api_key(self._provider_config, default_env="OPENAI_API_KEY")
         base_url = (self._provider_config.api_base_url or os.environ.get("OPENAI_BASE_URL") or "https://api.openai.com/v1").rstrip("/")
         endpoint = base_url + "/chat/completions"
+        resolution = _resolve_provider_output(self._provider_config, request)
         payload = {
             "model": self._provider_config.model,
             "messages": [
@@ -69,44 +66,21 @@ class OpenAICompatibleAdapter(ProviderAdapter):
             "top_p": request.decoding.get("top_p", 1.0),
             "max_tokens": request.decoding.get("max_output_tokens", 512),
         }
-        capabilities = get_provider_capabilities(self._provider_config)
-        resolution = resolve_structured_output(self._provider_config, capabilities, request.prompt.grammar)
         if resolution.response_format is not None:
             payload["response_format"] = resolution.response_format
 
-        body = json.dumps(payload).encode("utf-8")
-        http_request = urllib_request.Request(
-            endpoint,
-            data=body,
+        response_data = _post_json_request(
+            endpoint=endpoint,
+            payload=payload,
             headers={
                 "Authorization": "Bearer {0}".format(api_key),
                 "Content-Type": "application/json",
             },
-            method="POST",
+            timeout_seconds=self._provider_config.request_timeout_seconds,
         )
-        try:
-            with urllib_request.urlopen(http_request, timeout=self._provider_config.request_timeout_seconds) as response:
-                response_data = json.loads(response.read().decode("utf-8"))
-        except error.HTTPError as exc:
-            details = exc.read().decode("utf-8", errors="replace")
-            raise RuntimeError("Provider HTTP error {0}: {1}".format(exc.code, details))
-        except error.URLError as exc:
-            raise RuntimeError("Provider connection error: {0}".format(exc.reason))
 
         text = _extract_message_text(response_data)
-        return RawGeneration(
-            text=text,
-            provider_metadata={
-                "provider": "openai_compatible",
-                "model": response_data.get("model", self._provider_config.model),
-                "id": response_data.get("id"),
-                "usage": response_data.get("usage", {}),
-                "structured_output_strategy": resolution.resolved_strategy,
-                "structured_output_strategy_requested": self._provider_config.structured_output_strategy,
-                "structured_output_resolution_reason": resolution.resolution_reason,
-                "used_response_format": resolution.response_format,
-            },
-        )
+        return RawGeneration(text=text, provider_metadata=_build_provider_metadata("openai_compatible", self._provider_config, response_data, resolution))
 
 
 class AnthropicCompatibleAdapter(ProviderAdapter):
@@ -114,15 +88,10 @@ class AnthropicCompatibleAdapter(ProviderAdapter):
         self._provider_config = provider_config
 
     def generate(self, request: GenerationRequest) -> RawGeneration:
-        api_key_env = self._provider_config.api_key_env or "ANTHROPIC_API_KEY"
-        api_key = os.environ.get(api_key_env)
-        if not api_key:
-            raise RuntimeError("Missing API key environment variable: {0}".format(api_key_env))
-
+        api_key = _require_api_key(self._provider_config, default_env="ANTHROPIC_API_KEY")
         base_url = (self._provider_config.api_base_url or os.environ.get("ANTHROPIC_BASE_URL") or "https://api.anthropic.com/v1").rstrip("/")
         endpoint = base_url + "/messages"
-        capabilities = get_provider_capabilities(self._provider_config)
-        resolution = resolve_structured_output(self._provider_config, capabilities, request.prompt.grammar)
+        resolution = _resolve_provider_output(self._provider_config, request)
 
         payload = {
             "model": self._provider_config.model,
@@ -135,40 +104,19 @@ class AnthropicCompatibleAdapter(ProviderAdapter):
             "max_tokens": request.decoding.get("max_output_tokens", 512),
         }
 
-        body = json.dumps(payload).encode("utf-8")
-        http_request = urllib_request.Request(
-            endpoint,
-            data=body,
+        response_data = _post_json_request(
+            endpoint=endpoint,
+            payload=payload,
             headers={
                 "X-API-Key": api_key,
                 "Anthropic-Version": "2023-06-01",
                 "Content-Type": "application/json",
             },
-            method="POST",
+            timeout_seconds=self._provider_config.request_timeout_seconds,
         )
-        try:
-            with urllib_request.urlopen(http_request, timeout=self._provider_config.request_timeout_seconds) as response:
-                response_data = json.loads(response.read().decode("utf-8"))
-        except error.HTTPError as exc:
-            details = exc.read().decode("utf-8", errors="replace")
-            raise RuntimeError("Provider HTTP error {0}: {1}".format(exc.code, details))
-        except error.URLError as exc:
-            raise RuntimeError("Provider connection error: {0}".format(exc.reason))
 
         text = _extract_anthropic_message_text(response_data)
-        return RawGeneration(
-            text=text,
-            provider_metadata={
-                "provider": "anthropic_compatible",
-                "model": response_data.get("model", self._provider_config.model),
-                "id": response_data.get("id"),
-                "usage": response_data.get("usage", {}),
-                "structured_output_strategy": resolution.resolved_strategy,
-                "structured_output_strategy_requested": self._provider_config.structured_output_strategy,
-                "structured_output_resolution_reason": resolution.resolution_reason,
-                "used_response_format": resolution.response_format,
-            },
-        )
+        return RawGeneration(text=text, provider_metadata=_build_provider_metadata("anthropic_compatible", self._provider_config, response_data, resolution))
 
 
 def _extract_message_text(response_data: dict) -> str:
@@ -202,6 +150,50 @@ def _extract_anthropic_message_text(response_data: dict) -> str:
     if combined:
         return combined
     raise RuntimeError("Provider response does not contain JSON text content.")
+
+
+def _require_api_key(provider_config: ProviderConfig, default_env: str) -> str:
+    api_key_env = provider_config.api_key_env or default_env
+    api_key = os.environ.get(api_key_env)
+    if not api_key:
+        raise RuntimeError("Missing API key environment variable: {0}".format(api_key_env))
+    return api_key
+
+
+def _resolve_provider_output(provider_config: ProviderConfig, request: GenerationRequest):
+    capabilities = get_provider_capabilities(provider_config)
+    return resolve_structured_output(provider_config, capabilities, request.prompt.grammar)
+
+
+def _post_json_request(endpoint: str, payload: dict, headers: dict[str, str], timeout_seconds: int) -> dict:
+    body = json.dumps(payload).encode("utf-8")
+    http_request = urllib_request.Request(
+        endpoint,
+        data=body,
+        headers=headers,
+        method="POST",
+    )
+    try:
+        with urllib_request.urlopen(http_request, timeout=timeout_seconds) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except error.HTTPError as exc:
+        details = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError("Provider HTTP error {0}: {1}".format(exc.code, details))
+    except error.URLError as exc:
+        raise RuntimeError("Provider connection error: {0}".format(exc.reason))
+
+
+def _build_provider_metadata(provider_name: str, provider_config: ProviderConfig, response_data: dict, resolution) -> dict:
+    return {
+        "provider": provider_name,
+        "model": response_data.get("model", provider_config.model),
+        "id": response_data.get("id"),
+        "usage": response_data.get("usage", {}),
+        "structured_output_strategy": resolution.resolved_strategy,
+        "structured_output_strategy_requested": provider_config.structured_output_strategy,
+        "structured_output_resolution_reason": resolution.resolution_reason,
+        "used_response_format": resolution.response_format,
+    }
 
 
 def make_provider(provider_config: ProviderConfig, mock_response_path: Optional[Path] = None) -> ProviderAdapter:

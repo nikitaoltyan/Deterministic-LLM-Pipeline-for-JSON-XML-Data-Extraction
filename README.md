@@ -18,6 +18,7 @@ The project has an implemented JSON-track MVP and a format-neutral core orchestr
 - separated normalized-schema and grammar artifact builders
 - explicit provider capability profiles
 - deterministic structured-output strategy resolver
+- stabilized provider transport layer with shared request and metadata helpers
 - reproducibility layer with manifests and run fingerprints
 - artifact registry for formal pipeline artifacts
 
