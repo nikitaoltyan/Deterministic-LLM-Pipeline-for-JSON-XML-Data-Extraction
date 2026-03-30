@@ -5,6 +5,9 @@
 - The core pipeline orchestration is now format-aware and delegates parser, validator, repair, canonicalization, and typing through a runtime strategy layer.
 - The currently implemented strategy set is JSON-only, but the contract layer now reserves `xml` as a first-class target format identifier for later implementation.
 - The grammar layer is now implemented as a normalized schema compiler that emits provider-specific structured output contracts.
+- The normalized JSON schema subset now supports nullable fields, enums, nested objects, arrays, and selected scalar and collection constraints.
+- The current typing layer rejects unsupported `oneOf`/`anyOf`/`allOf` constructs explicitly rather than coercing them ambiguously.
+- The repair layer now applies deterministic safe transformations recursively inside nested objects and arrays.
 - `Omega` is now persisted as a run manifest with deterministic artifact fingerprints.
 - Formal artifacts are now resolved through an `ArtifactRegistry` bundle instead of being assembled ad hoc inside the pipeline.
 - Performance optimizations are not implemented because they are not an MVP requirement.

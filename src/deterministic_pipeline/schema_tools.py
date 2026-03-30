@@ -18,7 +18,7 @@ def schema_to_grammar(schema: dict[str, Any], schema_id: str = "schema") -> dict
     fingerprint = hashlib.sha256(canonical_schema.encode("utf-8")).hexdigest()
 
     return {
-        "artifact_version": "v2",
+        "artifact_version": "v3",
         "formalism": "normalized-json-schema-subset",
         "schema_name": schema_name,
         "fingerprint": fingerprint,
@@ -42,7 +42,10 @@ def schema_to_grammar(schema: dict[str, Any], schema_id: str = "schema") -> dict
 
 
 def _normalize_schema(schema: dict[str, Any]) -> dict[str, Any]:
-    schema_type = schema.get("type")
+    if "oneOf" in schema or "anyOf" in schema or "allOf" in schema:
+        raise ValueError("Union and composition constructs are not supported in the normalized schema subset.")
+
+    schema_type, nullable = _normalize_type(schema.get("type"))
     normalized: dict[str, Any] = {}
     if "$schema" in schema:
         normalized["$schema"] = schema["$schema"]
@@ -54,6 +57,11 @@ def _normalize_schema(schema: dict[str, Any]) -> dict[str, Any]:
         normalized["enum"] = list(schema["enum"])
     if schema_type is not None:
         normalized["type"] = schema_type
+    if nullable:
+        normalized["nullable"] = True
+    for key in ("default", "minLength", "maxLength", "minimum", "maximum", "minItems", "maxItems"):
+        if key in schema:
+            normalized[key] = schema[key]
 
     if schema_type == "object":
         properties = schema.get("properties", {})
@@ -65,11 +73,25 @@ def _normalize_schema(schema: dict[str, Any]) -> dict[str, Any]:
         normalized["additionalProperties"] = schema.get("additionalProperties", False)
     elif schema_type == "array":
         normalized["items"] = _normalize_schema(schema.get("items", {}))
-    else:
-        if "default" in schema:
-            normalized["default"] = schema["default"]
 
     return normalized
+
+
+def _normalize_type(schema_type: Any) -> tuple[str | None, bool]:
+    if schema_type is None:
+        return None, False
+    if isinstance(schema_type, str):
+        return schema_type, False
+    if isinstance(schema_type, list):
+        unique_types = []
+        for item in schema_type:
+            if item not in unique_types:
+                unique_types.append(item)
+        non_null = [item for item in unique_types if item != "null"]
+        has_null = len(non_null) != len(unique_types)
+        if len(non_null) == 1:
+            return non_null[0], has_null
+    raise ValueError("Only single types and nullable [type, null] unions are supported in the normalized schema subset.")
 
 
 def _to_schema_name(value: str) -> str:

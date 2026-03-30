@@ -13,13 +13,16 @@ Implemented tests currently cover:
 - non-repairable failure path
 - format-neutral pipeline result contract on the JSON track
 - grammar compiler output
+- richer normalized schema cases including nullable fields, enums, and nested constraints
+- recursive repair behavior for nested JSON objects and arrays
+- explicit failure on unsupported union/composition schema constructs
 - openai-compatible provider contract request building
 - missing API key handling
 - artifact registry bundle resolution
 
 Current local baseline:
 
-- `PYTHONPATH=src pytest -q` -> `8 passed`
+- `PYTHONPATH=src pytest -q` -> `14 passed`
 
 ## Test categories
 
@@ -70,7 +73,8 @@ Current local baseline:
 - nested objects
 - arrays of objects
 - enums
-- unions if introduced in the schema model
+- nullable fields
+- explicit rejection of unsupported unions/compositions in the current normalized subset
 
 ## Acceptance criteria
 

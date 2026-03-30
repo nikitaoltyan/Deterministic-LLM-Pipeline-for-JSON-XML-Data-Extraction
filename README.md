@@ -8,6 +8,8 @@ The project has an implemented JSON-track MVP and a format-neutral core orchestr
 
 - format-aware run configuration
 - format runtime registry for parser, validator, repair, canonicalization, and typing strategies
+- richer normalized JSON schema subset with nullable and enum support
+- recursive deterministic repair for nested JSON objects and arrays
 - deterministic local pipeline execution
 - mock provider adapter
 - openai-compatible live adapter
@@ -61,7 +63,7 @@ The layout is now partially materialized for the MVP scaffold.
 
 Local verification completed:
 
-- `PYTHONPATH=src pytest -q` -> `8 passed`
+- `PYTHONPATH=src pytest -q` -> `14 passed`
 - mock CLI path verified successfully
 
 Live external API verification is now supported by the codebase, but still must be run by the user with a real API key because network execution is not available in the current agent environment.

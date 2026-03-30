@@ -32,6 +32,15 @@ def _coerce_object(value: Any, schema: dict[str, Any], path: str) -> dict[str, A
 
 
 def _coerce_value(value: Any, schema: dict[str, Any], path: str) -> Any:
+    _reject_unsupported_schema(schema, path)
+    if value is None:
+        if schema.get("nullable") is True:
+            return None
+        raise TypeValidationError(f"{path}: null value is not allowed")
+
+    if "enum" in schema and value not in schema["enum"]:
+        raise TypeValidationError(f"{path}: value must be one of {schema['enum']}")
+
     schema_type = schema.get("type")
     if schema_type == "string":
         if type(value) is not str:
@@ -57,3 +66,9 @@ def _coerce_value(value: Any, schema: dict[str, Any], path: str) -> Any:
     if schema_type == "object":
         return _coerce_object(value, schema, path)
     raise TypeValidationError(f"{path}: unsupported schema type {schema_type!r}")
+
+
+def _reject_unsupported_schema(schema: dict[str, Any], path: str) -> None:
+    for keyword in ("oneOf", "anyOf", "allOf"):
+        if keyword in schema:
+            raise TypeValidationError(f"{path}: unsupported schema construct {keyword}")

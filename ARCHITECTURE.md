@@ -20,6 +20,9 @@ Current implementation status:
 
 - generalized core contracts implemented
 - JSON strategy implementations implemented
+- normalized JSON schema subset expanded for nullable fields, enums, and nested constraints
+- strict typing now fails explicitly on unsupported union/composition constructs
+- repair logic now recurses through nested JSON objects and arrays for formally safe transformations
 - XML declared as a target format identifier, but not implemented yet
 
 ## Chosen formal-constraint strategy
@@ -36,6 +39,16 @@ This choice is the most academically defensible and reproducible for the current
 Implementation status:
 - implemented as a normalized schema compiler plus provider-contract layer
 - current artifact formalism: `normalized-json-schema-subset`
+- current normalized subset supports:
+  - nested objects
+  - arrays
+  - enums
+  - nullable fields encoded as `[type, "null"]`
+  - selected scalar and collection constraints such as `minLength`, `maxLength`, `minimum`, `maximum`, `minItems`, and `maxItems`
+- explicitly unsupported in the current subset:
+  - `oneOf`
+  - `anyOf`
+  - `allOf`
 - current provider binding: `openai_compatible -> response_format.json_schema`
 - local validation and repair remain mandatory even when provider-side structured output is active
 
@@ -135,6 +148,7 @@ Allowed operations for MVP:
 - reorder keys
 - normalize primitive representations before re-validation
 - drop forbidden unknown fields only if policy allows it explicitly
+- recurse into nested objects and arrays when applying the same formally safe rules
 
 Forbidden operations for MVP:
 - infer missing semantic content

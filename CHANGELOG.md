@@ -33,3 +33,11 @@
 - Added JSON strategy implementations behind the new format runtime registry.
 - Refactored pipeline, tracing, and CLI to use format-neutral result fields with JSON backward compatibility retained through `canonical_json`.
 - Updated configs and tests to reflect the format-aware orchestration layer while preserving the current JSON-track baseline.
+
+## 2026-03-30
+
+- Completed Stage 2 of the extension roadmap: strengthened the normalized JSON schema subset and strict typing model.
+- Extended schema normalization to preserve nullable fields, enums, and selected scalar and collection constraints.
+- Made unsupported `oneOf`, `anyOf`, and `allOf` constructs fail explicitly in the normalized subset and typing layer.
+- Added recursive deterministic repair for nested JSON objects and arrays while keeping repairs policy-bounded.
+- Added tests for nested structures, nullable values, enum enforcement, and unsupported union/composition cases.
