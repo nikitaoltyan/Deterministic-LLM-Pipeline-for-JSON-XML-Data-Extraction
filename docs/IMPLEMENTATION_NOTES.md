@@ -9,6 +9,7 @@
 - Provider creation is now routed through an explicit registry rather than hardcoded branching in the factory path.
 - Provider capabilities are now represented explicitly rather than inferred indirectly inside provider adapters.
 - Structured-output strategy resolution is now handled by a separate deterministic resolver instead of being embedded in transport code.
+- A separate `anthropic_compatible` transport family is now implemented with prompt-only capability and mandatory downstream formal validation.
 - The normalized JSON schema subset now supports nullable fields, enums, nested objects, arrays, and selected scalar and collection constraints.
 - The current typing layer rejects unsupported `oneOf`/`anyOf`/`allOf` constructs explicitly rather than coercing them ambiguously.
 - The repair layer now applies deterministic safe transformations recursively inside nested objects and arrays.

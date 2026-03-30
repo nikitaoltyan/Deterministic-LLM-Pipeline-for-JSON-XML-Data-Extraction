@@ -6,7 +6,7 @@ import pytest
 
 from deterministic_pipeline.config import ProviderConfig
 from deterministic_pipeline.provider_registry import ProviderRegistry, build_default_provider_registry
-from deterministic_pipeline.providers import MockProviderAdapter, OpenAICompatibleAdapter
+from deterministic_pipeline.providers import AnthropicCompatibleAdapter, MockProviderAdapter, OpenAICompatibleAdapter
 
 
 def test_default_provider_registry_creates_registered_mock_provider() -> None:
@@ -35,3 +35,13 @@ def test_provider_registry_rejects_unknown_provider() -> None:
 
     with pytest.raises(ValueError, match="Unsupported provider"):
         registry.create(ProviderConfig(name="unknown-provider", model="x"))
+
+
+def test_default_provider_registry_creates_registered_anthropic_provider() -> None:
+    registry = build_default_provider_registry()
+
+    provider = registry.create(
+        ProviderConfig(name="anthropic_compatible", model="claude-test"),
+    )
+
+    assert isinstance(provider, AnthropicCompatibleAdapter)

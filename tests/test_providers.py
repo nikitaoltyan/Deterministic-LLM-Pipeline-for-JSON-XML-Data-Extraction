@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from deterministic_pipeline.config import ProviderConfig
 from deterministic_pipeline.contracts import GenerationRequest, PromptPackage
-from deterministic_pipeline.providers import OpenAICompatibleAdapter
+from deterministic_pipeline.providers import AnthropicCompatibleAdapter, OpenAICompatibleAdapter
 from deterministic_pipeline.schema_tools import schema_to_grammar
 
 
@@ -107,6 +107,99 @@ def test_openai_compatible_adapter_requires_api_key() -> None:
         prompt=PromptPackage(system_prompt="s", user_prompt="u", schema={}, grammar={}, template_metadata={"template_version": "test"}),
         provider_name="openai_compatible",
         model="gpt-test",
+        decoding={},
+        omega={},
+    )
+
+    with patch.dict(os.environ, {}, clear=True):
+        try:
+            adapter.generate(request_payload)
+        except RuntimeError as exc:
+            assert "Missing API key environment variable" in str(exc)
+        else:
+            raise AssertionError("Expected missing API key failure.")
+
+
+def test_anthropic_compatible_adapter_sends_request_and_extracts_text() -> None:
+    provider_config = ProviderConfig(
+        name="anthropic_compatible",
+        model="claude-test",
+        api_base_url="https://api.anthropic.com/v1",
+        api_key_env="ANTHROPIC_API_KEY",
+        request_timeout_seconds=10,
+        structured_output_strategy="auto",
+    )
+    adapter = AnthropicCompatibleAdapter(provider_config)
+    request_payload = GenerationRequest(
+        prompt=PromptPackage(
+            system_prompt="Return JSON only.",
+            user_prompt="Produce a small JSON object.",
+            schema={"type": "object"},
+            grammar=schema_to_grammar(
+                {
+                    "type": "object",
+                    "required": ["title"],
+                    "properties": {
+                        "title": {"type": "string"},
+                    },
+                    "additionalProperties": False,
+                },
+                schema_id="anthropic-live-test",
+            ),
+            template_metadata={"template_version": "test"},
+        ),
+        provider_name="anthropic_compatible",
+        model="claude-test",
+        decoding={"temperature": 0.0, "top_p": 1.0, "max_output_tokens": 128},
+        omega={"provider": {"name": "anthropic_compatible"}},
+    )
+
+    captured = {}
+
+    def fake_urlopen(http_request, timeout):
+        headers = {key.lower(): value for key, value in http_request.header_items()}
+        captured["url"] = http_request.full_url
+        captured["api_key"] = headers.get("x-api-key")
+        captured["version"] = headers.get("anthropic-version")
+        captured["content_type"] = headers.get("content-type")
+        captured["timeout"] = timeout
+        captured["body"] = json.loads(http_request.data.decode("utf-8"))
+        return FakeHTTPResponse(
+            {
+                "id": "msg-test",
+                "model": "claude-test",
+                "usage": {"input_tokens": 10, "output_tokens": 5},
+                "content": [
+                    {"type": "text", "text": '{"title":"Anthropic title","summary":"Anthropic summary","priority":1,"published":true}'}
+                ],
+            }
+        )
+
+    with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "anthropic-test-key"}, clear=False):
+        with patch("deterministic_pipeline.providers.urllib_request.urlopen", side_effect=fake_urlopen):
+            response = adapter.generate(request_payload)
+
+    assert response.text == '{"title":"Anthropic title","summary":"Anthropic summary","priority":1,"published":true}'
+    assert captured["url"] == "https://api.anthropic.com/v1/messages"
+    assert captured["api_key"] == "anthropic-test-key"
+    assert captured["version"] == "2023-06-01"
+    assert captured["content_type"] == "application/json"
+    assert captured["timeout"] == 10
+    assert "response_format" not in captured["body"]
+    assert captured["body"]["system"] == "Return JSON only."
+    assert captured["body"]["messages"][0]["role"] == "user"
+    assert response.provider_metadata["structured_output_strategy"] == "prompt_only"
+    assert response.provider_metadata["structured_output_strategy_requested"] == "auto"
+    assert response.provider_metadata["structured_output_resolution_reason"] == "auto_fallback_prompt_only"
+
+
+def test_anthropic_compatible_adapter_requires_api_key() -> None:
+    provider_config = ProviderConfig(name="anthropic_compatible", model="claude-test", api_key_env="ANTHROPIC_API_KEY")
+    adapter = AnthropicCompatibleAdapter(provider_config)
+    request_payload = GenerationRequest(
+        prompt=PromptPackage(system_prompt="s", user_prompt="u", schema={}, grammar={}, template_metadata={"template_version": "test"}),
+        provider_name="anthropic_compatible",
+        model="claude-test",
         decoding={},
         omega={},
     )

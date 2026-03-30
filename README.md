@@ -13,6 +13,7 @@ The project has an implemented JSON-track MVP and a format-neutral core orchestr
 - deterministic local pipeline execution
 - mock provider adapter
 - openai-compatible live adapter
+- anthropic-compatible live adapter
 - explicit provider registry for adapter construction
 - separated normalized-schema and grammar artifact builders
 - explicit provider capability profiles

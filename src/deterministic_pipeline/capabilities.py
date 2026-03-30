@@ -31,4 +31,12 @@ def get_provider_capabilities(provider_config: ProviderConfig) -> ProviderCapabi
             supports_json_schema=True,
             supports_strict_schema_output=True,
         )
+    if provider_config.name == "anthropic_compatible":
+        return ProviderCapabilityProfile(
+            provider_name="anthropic_compatible",
+            supports_prompt_only=True,
+            supports_json_object=False,
+            supports_json_schema=False,
+            supports_strict_schema_output=False,
+        )
     raise ValueError("Unsupported provider for capability resolution: {0}".format(provider_config.name))

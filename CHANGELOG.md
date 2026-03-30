@@ -51,3 +51,5 @@
 
 - Completed Stage 4, substep 1: introduced an explicit provider registry for adapter construction and removed hardcoded provider selection from the factory path.
 - Added registry tests for registered providers and unknown-provider failure handling.
+- Completed Stage 4, substep 2: added an `anthropic_compatible` provider family with explicit capability modeling and prompt-only structured-output resolution.
+- Added provider tests and an example config for the new transport family.

@@ -132,6 +132,7 @@ Responsibility:
 Current implementation:
 - explicit registry-backed construction for `mock`
 - explicit registry-backed construction for `openai_compatible`
+- explicit registry-backed construction for `anthropic_compatible`
 
 ### 4a. Provider capability model
 

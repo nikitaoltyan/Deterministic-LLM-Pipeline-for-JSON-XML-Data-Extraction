@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Callable, Optional
 
 from deterministic_pipeline.config import ProviderConfig
-from deterministic_pipeline.providers import MockProviderAdapter, OpenAICompatibleAdapter, ProviderAdapter
+from deterministic_pipeline.providers import AnthropicCompatibleAdapter, MockProviderAdapter, OpenAICompatibleAdapter, ProviderAdapter
 
 
 ProviderFactory = Callable[[ProviderConfig, Optional[Path]], ProviderAdapter]
@@ -35,6 +35,7 @@ def build_default_provider_registry() -> ProviderRegistry:
     registry = ProviderRegistry()
     registry.register("mock", _build_mock_provider)
     registry.register("openai_compatible", _build_openai_compatible_provider)
+    registry.register("anthropic_compatible", _build_anthropic_compatible_provider)
     return registry
 
 
@@ -44,3 +45,7 @@ def _build_mock_provider(provider_config: ProviderConfig, mock_response_path: Op
 
 def _build_openai_compatible_provider(provider_config: ProviderConfig, mock_response_path: Optional[Path]) -> ProviderAdapter:
     return OpenAICompatibleAdapter(provider_config)
+
+
+def _build_anthropic_compatible_provider(provider_config: ProviderConfig, mock_response_path: Optional[Path]) -> ProviderAdapter:
+    return AnthropicCompatibleAdapter(provider_config)

@@ -109,6 +109,68 @@ class OpenAICompatibleAdapter(ProviderAdapter):
         )
 
 
+class AnthropicCompatibleAdapter(ProviderAdapter):
+    def __init__(self, provider_config: ProviderConfig) -> None:
+        self._provider_config = provider_config
+
+    def generate(self, request: GenerationRequest) -> RawGeneration:
+        api_key_env = self._provider_config.api_key_env or "ANTHROPIC_API_KEY"
+        api_key = os.environ.get(api_key_env)
+        if not api_key:
+            raise RuntimeError("Missing API key environment variable: {0}".format(api_key_env))
+
+        base_url = (self._provider_config.api_base_url or os.environ.get("ANTHROPIC_BASE_URL") or "https://api.anthropic.com/v1").rstrip("/")
+        endpoint = base_url + "/messages"
+        capabilities = get_provider_capabilities(self._provider_config)
+        resolution = resolve_structured_output(self._provider_config, capabilities, request.prompt.grammar)
+
+        payload = {
+            "model": self._provider_config.model,
+            "system": request.prompt.system_prompt,
+            "messages": [
+                {"role": "user", "content": request.prompt.user_prompt},
+            ],
+            "temperature": request.decoding.get("temperature", 0.0),
+            "top_p": request.decoding.get("top_p", 1.0),
+            "max_tokens": request.decoding.get("max_output_tokens", 512),
+        }
+
+        body = json.dumps(payload).encode("utf-8")
+        http_request = urllib_request.Request(
+            endpoint,
+            data=body,
+            headers={
+                "X-API-Key": api_key,
+                "Anthropic-Version": "2023-06-01",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        try:
+            with urllib_request.urlopen(http_request, timeout=self._provider_config.request_timeout_seconds) as response:
+                response_data = json.loads(response.read().decode("utf-8"))
+        except error.HTTPError as exc:
+            details = exc.read().decode("utf-8", errors="replace")
+            raise RuntimeError("Provider HTTP error {0}: {1}".format(exc.code, details))
+        except error.URLError as exc:
+            raise RuntimeError("Provider connection error: {0}".format(exc.reason))
+
+        text = _extract_anthropic_message_text(response_data)
+        return RawGeneration(
+            text=text,
+            provider_metadata={
+                "provider": "anthropic_compatible",
+                "model": response_data.get("model", self._provider_config.model),
+                "id": response_data.get("id"),
+                "usage": response_data.get("usage", {}),
+                "structured_output_strategy": resolution.resolved_strategy,
+                "structured_output_strategy_requested": self._provider_config.structured_output_strategy,
+                "structured_output_resolution_reason": resolution.resolution_reason,
+                "used_response_format": resolution.response_format,
+            },
+        )
+
+
 def _extract_message_text(response_data: dict) -> str:
     choices = response_data.get("choices")
     if not choices:
@@ -125,6 +187,20 @@ def _extract_message_text(response_data: dict) -> str:
         combined = "".join(text_parts).strip()
         if combined:
             return combined
+    raise RuntimeError("Provider response does not contain JSON text content.")
+
+
+def _extract_anthropic_message_text(response_data: dict) -> str:
+    content = response_data.get("content")
+    if not isinstance(content, list):
+        raise RuntimeError("Provider response does not contain content blocks.")
+    text_parts = []
+    for block in content:
+        if isinstance(block, dict) and block.get("type") == "text":
+            text_parts.append(block.get("text", ""))
+    combined = "".join(text_parts).strip()
+    if combined:
+        return combined
     raise RuntimeError("Provider response does not contain JSON text content.")
 
 
