@@ -95,6 +95,9 @@ def test_openai_compatible_adapter_sends_request_and_extracts_text() -> None:
     assert captured["body"]["response_format"]["json_schema"]["name"] == "live_test"
     assert captured["body"]["messages"][0]["role"] == "system"
     assert captured["body"]["messages"][1]["role"] == "user"
+    assert response.provider_metadata["structured_output_strategy"] == "json_schema"
+    assert response.provider_metadata["structured_output_strategy_requested"] == "auto"
+    assert response.provider_metadata["structured_output_resolution_reason"] == "auto_prefer_json_schema"
 
 
 def test_openai_compatible_adapter_requires_api_key() -> None:

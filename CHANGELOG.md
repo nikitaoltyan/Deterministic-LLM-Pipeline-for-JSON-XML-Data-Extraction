@@ -41,3 +41,8 @@
 - Made unsupported `oneOf`, `anyOf`, and `allOf` constructs fail explicitly in the normalized subset and typing layer.
 - Added recursive deterministic repair for nested JSON objects and arrays while keeping repairs policy-bounded.
 - Added tests for nested structures, nullable values, enum enforcement, and unsupported union/composition cases.
+- Completed Stage 3, substep 1: separated normalized schema artifact construction from grammar artifact construction while preserving current provider-contract behavior.
+- Updated artifact registry integration to use explicit normalized-schema and grammar builders.
+- Completed Stage 3, substep 2: introduced explicit provider capability profiles for `mock` and `openai_compatible`.
+- Completed Stage 3, substep 3: extracted deterministic structured-output strategy resolution into a standalone resolver and simplified provider transport logic.
+- Added tests for provider capabilities, structured-output strategy resolution, and the updated provider request path.

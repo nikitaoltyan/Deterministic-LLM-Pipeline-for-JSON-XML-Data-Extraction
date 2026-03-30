@@ -7,8 +7,10 @@ from pathlib import Path
 from typing import Optional
 from urllib import error, request as urllib_request
 
+from deterministic_pipeline.capabilities import get_provider_capabilities
 from deterministic_pipeline.config import ProviderConfig
 from deterministic_pipeline.contracts import GenerationRequest, RawGeneration
+from deterministic_pipeline.strategy_resolution import resolve_structured_output
 
 
 class ProviderAdapter(ABC):
@@ -67,9 +69,10 @@ class OpenAICompatibleAdapter(ProviderAdapter):
             "top_p": request.decoding.get("top_p", 1.0),
             "max_tokens": request.decoding.get("max_output_tokens", 512),
         }
-        response_format = _resolve_structured_output_contract(request, self._provider_config)
-        if response_format is not None:
-            payload["response_format"] = response_format
+        capabilities = get_provider_capabilities(self._provider_config)
+        resolution = resolve_structured_output(self._provider_config, capabilities, request.prompt.grammar)
+        if resolution.response_format is not None:
+            payload["response_format"] = resolution.response_format
 
         body = json.dumps(payload).encode("utf-8")
         http_request = urllib_request.Request(
@@ -98,8 +101,10 @@ class OpenAICompatibleAdapter(ProviderAdapter):
                 "model": response_data.get("model", self._provider_config.model),
                 "id": response_data.get("id"),
                 "usage": response_data.get("usage", {}),
-                "structured_output_strategy": self._provider_config.structured_output_strategy,
-                "used_response_format": response_format,
+                "structured_output_strategy": resolution.resolved_strategy,
+                "structured_output_strategy_requested": self._provider_config.structured_output_strategy,
+                "structured_output_resolution_reason": resolution.resolution_reason,
+                "used_response_format": resolution.response_format,
             },
         )
 
@@ -129,26 +134,3 @@ def make_provider(provider_config: ProviderConfig, mock_response_path: Optional[
     if provider_config.name == "openai_compatible":
         return OpenAICompatibleAdapter(provider_config)
     raise ValueError("Unsupported provider: {0}".format(provider_config.name))
-
-
-def _resolve_structured_output_contract(request: GenerationRequest, provider_config: ProviderConfig) -> Optional[dict]:
-    strategy = provider_config.structured_output_strategy
-    provider_contracts = request.prompt.grammar.get("provider_contracts", {})
-    openai_contract = provider_contracts.get("openai_compatible", {})
-
-    if strategy == "prompt_only":
-        return None
-    if strategy == "json_object":
-        return {"type": "json_object"} if provider_config.use_json_response_format else None
-    if strategy == "json_schema":
-        response_format = openai_contract.get("response_format")
-        if response_format is None:
-            raise RuntimeError("Structured output strategy json_schema requested, but no provider contract is available.")
-        return response_format
-    if strategy == "auto":
-        if openai_contract.get("response_format") is not None:
-            return openai_contract["response_format"]
-        if provider_config.use_json_response_format:
-            return {"type": "json_object"}
-        return None
-    raise RuntimeError("Unknown structured output strategy: {0}".format(strategy))

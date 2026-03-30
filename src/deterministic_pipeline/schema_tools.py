@@ -11,21 +11,40 @@ def load_schema(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def schema_to_grammar(schema: dict[str, Any], schema_id: str = "schema") -> dict[str, Any]:
+def normalize_json_schema_artifact(schema: dict[str, Any], schema_id: str = "schema") -> dict[str, Any]:
     normalized_schema = _normalize_schema(schema)
     schema_name = _to_schema_name(schema_id or schema.get("title", "schema"))
     canonical_schema = json.dumps(normalized_schema, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     fingerprint = hashlib.sha256(canonical_schema.encode("utf-8")).hexdigest()
 
     return {
-        "artifact_version": "v3",
+        "artifact_version": "v1",
         "formalism": "normalized-json-schema-subset",
         "schema_name": schema_name,
         "fingerprint": fingerprint,
         "root_type": normalized_schema.get("type", "object"),
+        "normalized_schema": normalized_schema,
+    }
+
+
+def build_json_grammar_artifact(normalized_schema_artifact: dict[str, Any]) -> dict[str, Any]:
+    normalized_schema = normalized_schema_artifact["normalized_schema"]
+    schema_name = normalized_schema_artifact["schema_name"]
+
+    return {
+        "artifact_version": "v1",
+        "formalism": "normalized-json-schema-subset",
+        "schema_name": schema_name,
+        "fingerprint": normalized_schema_artifact["fingerprint"],
+        "root_type": normalized_schema.get("type", "object"),
         "required": list(normalized_schema.get("required", [])),
         "properties": sorted(normalized_schema.get("properties", {}).keys()),
         "normalized_schema": normalized_schema,
+        "schema_artifact_ref": {
+            "formalism": normalized_schema_artifact["formalism"],
+            "artifact_version": normalized_schema_artifact["artifact_version"],
+            "fingerprint": normalized_schema_artifact["fingerprint"],
+        },
         "provider_contracts": {
             "openai_compatible": {
                 "response_format": {
@@ -39,6 +58,11 @@ def schema_to_grammar(schema: dict[str, Any], schema_id: str = "schema") -> dict
             }
         },
     }
+
+
+def schema_to_grammar(schema: dict[str, Any], schema_id: str = "schema") -> dict[str, Any]:
+    normalized_schema_artifact = normalize_json_schema_artifact(schema, schema_id=schema_id)
+    return build_json_grammar_artifact(normalized_schema_artifact)
 
 
 def _normalize_schema(schema: dict[str, Any]) -> dict[str, Any]:

@@ -13,7 +13,9 @@ The project has an implemented JSON-track MVP and a format-neutral core orchestr
 - deterministic local pipeline execution
 - mock provider adapter
 - openai-compatible live adapter
-- schema-derived grammar layer
+- separated normalized-schema and grammar artifact builders
+- explicit provider capability profiles
+- deterministic structured-output strategy resolver
 - reproducibility layer with manifests and run fingerprints
 - artifact registry for formal pipeline artifacts
 
@@ -63,7 +65,7 @@ The layout is now partially materialized for the MVP scaffold.
 
 Local verification completed:
 
-- `PYTHONPATH=src pytest -q` -> `14 passed`
+- `PYTHONPATH=src pytest -q` -> `21 passed`
 - mock CLI path verified successfully
 
 Live external API verification is now supported by the codebase, but still must be run by the user with a real API key because network execution is not available in the current agent environment.

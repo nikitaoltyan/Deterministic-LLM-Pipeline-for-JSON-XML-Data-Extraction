@@ -16,13 +16,15 @@ Implemented tests currently cover:
 - richer normalized schema cases including nullable fields, enums, and nested constraints
 - recursive repair behavior for nested JSON objects and arrays
 - explicit failure on unsupported union/composition schema constructs
+- provider capability profile resolution
+- deterministic structured-output strategy resolution
 - openai-compatible provider contract request building
 - missing API key handling
 - artifact registry bundle resolution
 
 Current local baseline:
 
-- `PYTHONPATH=src pytest -q` -> `14 passed`
+- `PYTHONPATH=src pytest -q` -> `21 passed`
 
 ## Test categories
 
@@ -30,6 +32,8 @@ Current local baseline:
 
 - config loading and freezing
 - format runtime resolution
+- provider capability resolution
+- structured-output strategy resolution
 - prompt building determinism
 - schema validation behavior
 - repair rule determinism

@@ -37,7 +37,11 @@ For the MVP, the primary formal strategy is:
 This choice is the most academically defensible and reproducible for the current constraints because it keeps the formal source of truth in repository-controlled artifacts rather than in opaque provider-specific behavior. Provider-native features are optimization or transport mechanisms, not the trust boundary.
 
 Implementation status:
-- implemented as a normalized schema compiler plus provider-contract layer
+- implemented as separate normalized-schema and grammar artifact builders plus a provider-contract layer
+- current provider integration is split into:
+  - provider capability profiles
+  - deterministic structured-output strategy resolution
+  - transport adapters
 - current artifact formalism: `normalized-json-schema-subset`
 - current normalized subset supports:
   - nested objects
@@ -49,6 +53,14 @@ Implementation status:
   - `oneOf`
   - `anyOf`
   - `allOf`
+- normalized schema artifact and grammar artifact are now constructed as separate stages
+- current provider capability model implemented for:
+  - `mock`
+  - `openai_compatible`
+- current strategy resolution order for `auto`:
+  1. `json_schema`
+  2. `json_object`
+  3. `prompt_only`
 - current provider binding: `openai_compatible -> response_format.json_schema`
 - local validation and repair remain mandatory even when provider-side structured output is active
 
@@ -109,6 +121,36 @@ Outputs:
 
 Invariants:
 - Supports `I4` by making all provider parameters explicit and logged
+
+### 4a. Provider capability model
+
+Responsibility:
+- Represent which structured-output modes a provider can support
+
+Current explicit capabilities:
+- `supports_prompt_only`
+- `supports_json_object`
+- `supports_json_schema`
+- `supports_strict_schema_output`
+
+### 4b. Structured-output strategy resolver
+
+Responsibility:
+- Select the concrete structured-output mode deterministically from:
+  - requested strategy in config
+  - provider capability profile
+  - provider-specific contract embedded in the grammar artifact
+
+Current supported strategies:
+- `prompt_only`
+- `json_object`
+- `json_schema`
+- `auto`
+
+Current `auto` resolution priority:
+1. `json_schema`
+2. `json_object`
+3. `prompt_only`
 
 ### 5. Formal gate
 

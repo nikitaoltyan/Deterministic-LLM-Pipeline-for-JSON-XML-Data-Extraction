@@ -19,6 +19,9 @@ def test_artifact_registry_resolves_consistent_bundle() -> None:
     assert bundle.prompt_template.version == "v1"
     assert bundle.repair_policy.fingerprint
     assert bundle.canonicalization_policy.fingerprint
+    assert bundle.grammar.payload["schema_artifact_ref"]["formalism"] == "normalized-json-schema-subset"
+    assert bundle.grammar.payload["schema_artifact_ref"]["artifact_version"] == "v1"
+    assert bundle.grammar.payload["schema_artifact_ref"]["fingerprint"]
     snapshot = bundle.registry_snapshot()
     assert snapshot["schema"]["fingerprint"] == bundle.schema.fingerprint
     assert snapshot["grammar"]["fingerprint"] == bundle.grammar.fingerprint

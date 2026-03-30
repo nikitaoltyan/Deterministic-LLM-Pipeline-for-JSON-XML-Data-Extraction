@@ -6,7 +6,7 @@ from typing import Any
 from deterministic_pipeline.config import RunConfig
 from deterministic_pipeline.prompting import get_prompt_template_spec
 from deterministic_pipeline.reproducibility import sha256_json
-from deterministic_pipeline.schema_tools import load_schema, schema_to_grammar
+from deterministic_pipeline.schema_tools import build_json_grammar_artifact, load_schema, normalize_json_schema_artifact
 
 
 @dataclass(frozen=True)
@@ -66,7 +66,8 @@ class ArtifactRegistry:
         )
 
     def resolve_grammar(self, run_config: RunConfig, schema_artifact: ArtifactRecord) -> ArtifactRecord:
-        payload = schema_to_grammar(schema_artifact.payload, schema_id=run_config.schema_id)
+        normalized_schema_artifact = normalize_json_schema_artifact(schema_artifact.payload, schema_id=run_config.schema_id)
+        payload = build_json_grammar_artifact(normalized_schema_artifact)
         return ArtifactRecord(
             kind="grammar",
             artifact_id="{0}:{1}".format(run_config.schema_id, run_config.grammar_strategy),
