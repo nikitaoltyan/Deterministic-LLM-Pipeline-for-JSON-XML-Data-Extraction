@@ -25,3 +25,14 @@ def test_artifact_registry_resolves_consistent_bundle() -> None:
     snapshot = bundle.registry_snapshot()
     assert snapshot["schema"]["fingerprint"] == bundle.schema.fingerprint
     assert snapshot["grammar"]["fingerprint"] == bundle.grammar.fingerprint
+
+
+def test_artifact_registry_resolves_xsd_bundle_for_xml() -> None:
+    config = load_run_config(PROJECT_ROOT / "configs" / "mock_run_xml.json")
+
+    bundle = ArtifactRegistry().resolve_bundle(config)
+
+    assert bundle.schema.metadata["schema_format"] == "xsd"
+    assert bundle.schema.payload["formalism"] == "normalized-xsd-subset"
+    assert bundle.grammar.payload["formalism"] == "normalized-xsd-subset"
+    assert bundle.grammar.payload["schema_artifact_ref"]["formalism"] == "normalized-xsd-subset"

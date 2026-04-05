@@ -8,7 +8,8 @@ The project has an implemented JSON-track MVP and a format-neutral core orchestr
 
 - format-aware run configuration
 - format runtime registry for parser, validator, repair, canonicalization, and typing strategies
-- baseline XML runtime path with parser, canonicalizer, and end-to-end pipeline support
+- XML runtime path with baseline parser/canonicalizer support and XSD-aware validation
+- explicit `schema_format` support for JSON Schema and XSD artifact resolution
 - richer normalized JSON schema subset with nullable and enum support
 - recursive deterministic repair for nested JSON objects and arrays
 - deterministic local pipeline execution
@@ -27,8 +28,8 @@ The project has an implemented JSON-track MVP and a format-neutral core orchestr
 
 - Output formats:
   - implemented: JSON
-  - implemented baseline runtime path: XML
-  - planned next for XML: XSD validation, XML repair policy, strict XML typing
+  - implemented with XSD-aware validation: XML
+  - planned next for XML: XML repair policy and strict XML typing
 - Runtime: Python 3.12
 - Interfaces: library + CLI
 - LLM access: remote API adapters
@@ -70,8 +71,8 @@ The layout is now partially materialized for the MVP scaffold.
 
 Local verification completed:
 
-- `PYTHONPATH=src pytest -q` -> `32 passed`
-- mock CLI path verified successfully for both JSON and XML baseline configs
+- `PYTHONPATH=src pytest -q` -> `37 passed`
+- mock CLI path verified successfully for both JSON and XML XSD-backed configs
 
 Live external API verification is now supported by the codebase, but still must be run by the user with a real API key because network execution is not available in the current agent environment.
 

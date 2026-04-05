@@ -62,3 +62,7 @@
 - Extended the format runtime registry so `output_format=xml` now runs end-to-end through the pipeline.
 - Made prompt templates output-format-aware so the XML path no longer reuses JSON-only generation instructions.
 - Added XML mock config, XML fixture, XML golden output, parser/canonicalizer tests, and an end-to-end XML smoke test.
+- Completed Stage 5, substep 2: added normalized XSD subset support and XSD-aware XML validation.
+- Added explicit `schema_format` handling so the formal layer can resolve either JSON Schema or XSD artifacts.
+- Added normalized XSD artifact construction, XML grammar artifact construction for the XSD path, and XSD-aware artifact registry integration.
+- Added XSD-backed XML config, XSD schema fixture, XSD normalization tests, XML validator tests, and XML artifact registry tests.

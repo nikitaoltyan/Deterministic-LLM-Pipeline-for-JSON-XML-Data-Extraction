@@ -10,6 +10,10 @@
     "schema_path": {
       "type": "string"
     },
+    "schema_format": {
+      "type": "string",
+      "enum": ["json_schema", "xsd"]
+    },
     "output_format": {
       "type": "string",
       "enum": ["json", "xml"]

@@ -1,6 +1,7 @@
 {
   "schema_id": "extraction-record-v1",
-  "schema_path": "schemas/extraction_record.schema.json",
+  "schema_path": "schemas/extraction_record.xsd",
+  "schema_format": "xsd",
   "output_format": "xml",
   "provider": {
     "name": "mock",

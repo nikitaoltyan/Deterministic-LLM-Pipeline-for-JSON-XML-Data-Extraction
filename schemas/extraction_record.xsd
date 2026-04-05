@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="record">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="title" type="xs:string"/>
+        <xs:element name="summary" type="xs:string"/>
+        <xs:element name="tags" minOccurs="1" maxOccurs="1">
+          <xs:complexType/>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="priority" type="xs:int" use="required"/>
+      <xs:attribute name="published" type="xs:boolean" use="required"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

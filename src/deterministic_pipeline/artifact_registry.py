@@ -3,10 +3,17 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from deterministic_pipeline.config import RunConfig
+from deterministic_pipeline.config import RunConfig, SchemaFormat
 from deterministic_pipeline.prompting import get_prompt_template_spec
 from deterministic_pipeline.reproducibility import sha256_json
-from deterministic_pipeline.schema_tools import build_json_grammar_artifact, load_schema, normalize_json_schema_artifact
+from deterministic_pipeline.schema_tools import (
+    build_json_grammar_artifact,
+    build_xml_grammar_artifact,
+    load_schema,
+    load_xsd_text,
+    normalize_json_schema_artifact,
+    normalize_xsd_schema_artifact,
+)
 
 
 @dataclass(frozen=True)
@@ -54,20 +61,35 @@ class ArtifactRegistry:
         )
 
     def resolve_schema(self, run_config: RunConfig) -> ArtifactRecord:
-        payload = load_schema(run_config.schema_path)
+        if run_config.schema_format == SchemaFormat.JSON_SCHEMA:
+            payload = load_schema(run_config.schema_path)
+            fingerprint = sha256_json(payload)
+            metadata = {"path": str(run_config.schema_path), "schema_format": run_config.schema_format.value}
+        elif run_config.schema_format == SchemaFormat.XSD:
+            xsd_text = load_xsd_text(run_config.schema_path)
+            payload = normalize_xsd_schema_artifact(xsd_text, schema_id=run_config.schema_id)
+            fingerprint = payload["fingerprint"]
+            metadata = {"path": str(run_config.schema_path), "schema_format": run_config.schema_format.value}
+        else:
+            raise ValueError(f"Unsupported schema format: {run_config.schema_format.value}")
         return ArtifactRecord(
             kind="schema",
             artifact_id=run_config.schema_id,
             version="v1",
-            fingerprint=sha256_json(payload),
+            fingerprint=fingerprint,
             source=str(run_config.schema_path),
             payload=payload,
-            metadata={"path": str(run_config.schema_path)},
+            metadata=metadata,
         )
 
     def resolve_grammar(self, run_config: RunConfig, schema_artifact: ArtifactRecord) -> ArtifactRecord:
-        normalized_schema_artifact = normalize_json_schema_artifact(schema_artifact.payload, schema_id=run_config.schema_id)
-        payload = build_json_grammar_artifact(normalized_schema_artifact)
+        if run_config.schema_format == SchemaFormat.JSON_SCHEMA:
+            normalized_schema_artifact = normalize_json_schema_artifact(schema_artifact.payload, schema_id=run_config.schema_id)
+            payload = build_json_grammar_artifact(normalized_schema_artifact)
+        elif run_config.schema_format == SchemaFormat.XSD:
+            payload = build_xml_grammar_artifact(schema_artifact.payload)
+        else:
+            raise ValueError(f"Unsupported schema format: {run_config.schema_format.value}")
         return ArtifactRecord(
             kind="grammar",
             artifact_id="{0}:{1}".format(run_config.schema_id, run_config.grammar_strategy),

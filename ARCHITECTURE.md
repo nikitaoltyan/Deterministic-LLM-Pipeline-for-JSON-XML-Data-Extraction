@@ -1,6 +1,6 @@
 # Architecture
 
-This document reflects the approved architecture, the currently implemented JSON-track baseline, the generalized core pipeline contracts, and the first baseline XML runtime path.
+This document reflects the approved architecture, the currently implemented JSON-track baseline, the generalized core pipeline contracts, and the current XML/XSD extension stage.
 
 ## Architectural summary
 
@@ -20,11 +20,11 @@ Current implementation status:
 
 - generalized core contracts implemented
 - JSON strategy implementations implemented
-- baseline XML strategy implementations implemented for parsing, canonicalization, no-op repair, baseline validation, and identity type mapping
+- XML strategy implementations implemented for parsing, canonicalization, XSD-aware validation, no-op repair, and identity type mapping
 - normalized JSON schema subset expanded for nullable fields, enums, and nested constraints
 - strict typing now fails explicitly on unsupported union/composition constructs
 - repair logic now recurses through nested JSON objects and arrays for formally safe transformations
-- XML runtime path implemented without XSD-aware validation yet
+- XML runtime path implemented with XSD-aware validation against a normalized XSD subset
 
 ## Chosen formal-constraint strategy
 
@@ -44,7 +44,9 @@ Implementation status:
   - provider capability profiles
   - deterministic structured-output strategy resolution
   - transport adapters
-- current artifact formalism: `normalized-json-schema-subset`
+- current artifact formalisms:
+  - `normalized-json-schema-subset`
+  - `normalized-xsd-subset`
 - current normalized subset supports:
   - nested objects
   - arrays
@@ -56,6 +58,7 @@ Implementation status:
   - `anyOf`
   - `allOf`
 - normalized schema artifact and grammar artifact are now constructed as separate stages
+- configuration now distinguishes `schema_format` from `output_format`
 - current provider capability model implemented for:
   - `mock`
   - `openai_compatible`
@@ -231,7 +234,7 @@ Canonicalization rules:
 - normalized numeric formatting
 - normalized null/empty handling by explicit policy
 - fixed date/time normalization rules once date types are introduced
-- for XML baseline: deterministic XML declaration, stable attribute ordering, stable empty-element rendering, and normalized element text trimming
+- for XML: deterministic XML declaration, stable attribute ordering, stable empty-element rendering, and normalized element text trimming
 
 Outputs:
 - canonical serialized representation
@@ -253,10 +256,10 @@ Outputs:
 Invariants:
 - Directly enforces `I3`
 
-Current XML baseline note:
+Current XML note:
 - JSON path uses schema-driven strict typing
-- XML path currently returns a deterministic structural tree representation
-- strict XML-to-application typing is deferred to the XSD-aware extension stage
+- XML path now validates against a normalized XSD subset and returns a deterministic structural tree representation
+- strict XML-to-application typing is deferred to the next XML extension stage
 
 ### 10. Trace/report layer
 

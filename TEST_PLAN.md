@@ -9,12 +9,13 @@ Verify the four invariants and the reproducibility claims of the pipeline.
 Implemented tests currently cover:
 
 - end-to-end success path
-- end-to-end XML baseline success path
+- end-to-end XML XSD-backed success path
 - deterministic repeated run for fixed input/config
 - non-repairable failure path
 - format-neutral pipeline result contract on the JSON track
 - XML parser success and malformed-XML rejection
 - XML canonicalization stability
+- XSD normalization and XML-against-XSD validation
 - grammar compiler output
 - richer normalized schema cases including nullable fields, enums, and nested constraints
 - recursive repair behavior for nested JSON objects and arrays
@@ -28,7 +29,7 @@ Implemented tests currently cover:
 
 Current local baseline:
 
-- `PYTHONPATH=src pytest -q` -> `32 passed`
+- `PYTHONPATH=src pytest -q` -> `37 passed`
 
 ## Test categories
 
@@ -92,8 +93,8 @@ Current local baseline:
 - `I1`: every successful result parses as the configured structured format without error
 - current implemented paths:
   - JSON with schema-driven validation
-  - XML baseline runtime parsing
-- `I2`: every successful result passes JSON Schema validation
+  - XML with normalized-XSD validation
+- `I2`: every successful result passes the configured formal schema validator
 - `I3`: every successful result converts to strict typed objects without lossy coercion
 - `I4`: repeated runs under fixed environment configuration are byte-identical after canonicalization
 
@@ -102,7 +103,7 @@ Current local baseline:
 - corpus-level golden tests are still limited
 - live API reproducibility is not treated as a hard determinism proof
 - batch evaluation and stress harnesses are not implemented yet
-- XSD-aware XML validation and strict XML typing are not implemented yet
+- strict XML typing and XML repair beyond no-op behavior are not implemented yet
 
 ## Constraints to note during implementation
 

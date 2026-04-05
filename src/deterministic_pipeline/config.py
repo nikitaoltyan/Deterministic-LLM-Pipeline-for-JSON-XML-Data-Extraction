@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import Any, Optional, Tuple
 
 from deterministic_pipeline.formats import StructuredFormat
+
+
+class SchemaFormat(str, Enum):
+    JSON_SCHEMA = "json_schema"
+    XSD = "xsd"
 
 
 @dataclass(frozen=True)
@@ -61,6 +67,7 @@ class ProviderConfig:
 class RunConfig:
     schema_id: str
     schema_path: Path
+    schema_format: SchemaFormat = SchemaFormat.JSON_SCHEMA
     output_format: StructuredFormat = StructuredFormat.JSON
     provider: ProviderConfig = field(default_factory=ProviderConfig)
     decoding: DecodingConfig = field(default_factory=DecodingConfig)
@@ -78,6 +85,7 @@ class RunConfig:
         return {
             "schema_id": self.schema_id,
             "schema_path": str(self.schema_path),
+            "schema_format": self.schema_format.value,
             "output_format": self.output_format.value,
             "provider": self.provider.as_json(),
             "decoding": self.decoding.as_json(),
@@ -115,6 +123,7 @@ def load_run_config(path: Path) -> RunConfig:
     return RunConfig(
         schema_id=data["schema_id"],
         schema_path=Path(data["schema_path"]),
+        schema_format=SchemaFormat(data.get("schema_format", SchemaFormat.JSON_SCHEMA.value)),
         output_format=StructuredFormat(data.get("output_format", StructuredFormat.JSON.value)),
         provider=ProviderConfig(**provider_data),
         decoding=DecodingConfig(**decoding_data),
