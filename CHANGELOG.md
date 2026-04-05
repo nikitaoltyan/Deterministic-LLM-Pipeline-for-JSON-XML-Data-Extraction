@@ -66,3 +66,7 @@
 - Added explicit `schema_format` handling so the formal layer can resolve either JSON Schema or XSD artifacts.
 - Added normalized XSD artifact construction, XML grammar artifact construction for the XSD path, and XSD-aware artifact registry integration.
 - Added XSD-backed XML config, XSD schema fixture, XSD normalization tests, XML validator tests, and XML artifact registry tests.
+- Completed Stage 5, substep 3: added deterministic XML repair and XSD-driven XML type mapping.
+- Made the XML validator stricter for unexpected attributes, missing scalar text, and mixed content in complex elements.
+- Added repair behavior for safe XML corrections: dropping unknown attributes/elements, scalar normalization, and sequence reordering.
+- Added XML typed mapping tests, XML repair tests, and an end-to-end XML repairable-output pipeline test.

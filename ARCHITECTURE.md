@@ -20,7 +20,7 @@ Current implementation status:
 
 - generalized core contracts implemented
 - JSON strategy implementations implemented
-- XML strategy implementations implemented for parsing, canonicalization, XSD-aware validation, no-op repair, and identity type mapping
+- XML strategy implementations implemented for parsing, canonicalization, XSD-aware validation, deterministic repair, and typed mapping
 - normalized JSON schema subset expanded for nullable fields, enums, and nested constraints
 - strict typing now fails explicitly on unsupported union/composition constructs
 - repair logic now recurses through nested JSON objects and arrays for formally safe transformations
@@ -258,8 +258,8 @@ Invariants:
 
 Current XML note:
 - JSON path uses schema-driven strict typing
-- XML path now validates against a normalized XSD subset and returns a deterministic structural tree representation
-- strict XML-to-application typing is deferred to the next XML extension stage
+- XML path now validates against a normalized XSD subset, applies deterministic structural repair, and maps valid XML to typed application objects
+- further XML extension work is still required for a broader XSD subset and richer domain-specific XML typing policies
 
 ### 10. Trace/report layer
 

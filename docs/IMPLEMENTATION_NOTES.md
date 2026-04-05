@@ -4,9 +4,9 @@
 - A real `openai_compatible` adapter is implemented behind the provider contract.
 - The core pipeline orchestration is now format-aware and delegates parser, validator, repair, canonicalization, and typing through a runtime strategy layer.
 - The JSON strategy set is fully implemented and the XML path now uses a normalized XSD subset for formal validation.
-- The XML runtime currently includes XML parsing, deterministic canonical serialization, XSD-aware validation, no-op repair, and identity type mapping.
+- The XML runtime currently includes XML parsing, deterministic canonical serialization, XSD-aware validation, deterministic repair for safe structural corrections, and typed mapping into application-oriented objects.
 - Configuration now distinguishes `schema_format` from `output_format`, which allows JSON Schema and XSD to coexist under the same orchestration layer.
-- Strict XML-to-domain typing is not implemented yet.
+- The current XML type mapper covers the implemented normalized XSD subset; broader XML typing policies remain future work.
 - The grammar layer is now implemented as a normalized schema compiler that emits provider-specific structured output contracts.
 - The normalized schema artifact and grammar artifact are now built through separate explicit builder steps, which prepares the codebase for later capability modeling and strategy resolution.
 - Provider creation is now routed through an explicit registry rather than hardcoded branching in the factory path.

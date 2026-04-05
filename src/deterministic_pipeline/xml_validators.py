@@ -37,6 +37,15 @@ def _validate_against_normalized_xsd(
     if not isinstance(attributes, dict):
         issues.append(ValidationIssue(path=f"{path}.attributes", message="XML attributes must be an object.", validator="xml_structure"))
         return issues
+    unexpected_attributes = sorted(set(attributes.keys()) - set(schema_element.get("attributes", {}).keys()))
+    for name in unexpected_attributes:
+        issues.append(
+            ValidationIssue(
+                path=f"{path}.@{name}",
+                message=f"Unexpected XML attribute '{name}'.",
+                validator="xsd_unexpected_attribute",
+            )
+        )
     for name, attribute_schema in schema_element.get("attributes", {}).items():
         if attribute_schema.get("required") and name not in attributes:
             issues.append(
@@ -60,6 +69,14 @@ def _validate_against_normalized_xsd(
     if not isinstance(child_documents, list):
         issues.append(ValidationIssue(path=f"{path}.children", message="XML children must be a list.", validator="xml_structure"))
         return issues
+    if schema_element.get("type") == "complex" and document.get("text") is not None:
+        issues.append(
+            ValidationIssue(
+                path=path,
+                message=f"Complex XML element '{schema_element['name']}' must not contain direct text content.",
+                validator="xsd_mixed_content",
+            )
+        )
 
     expected_children = schema_element.get("children", [])
     cursor = 0
@@ -96,6 +113,14 @@ def _validate_child_node(document: dict[str, Any], schema_element: dict[str, Any
     if schema_element.get("type") == "complex":
         return _validate_against_normalized_xsd(document, schema_element, path)
     text = document.get("text")
+    if text is None:
+        return [
+            ValidationIssue(
+                path=path,
+                message=f"Scalar XML element '{schema_element['name']}' must contain text.",
+                validator="xsd_missing_text",
+            )
+        ]
     if not _matches_scalar_type(text, schema_element.get("type")):
         return [
             ValidationIssue(

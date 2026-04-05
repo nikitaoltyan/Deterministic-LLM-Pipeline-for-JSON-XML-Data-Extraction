@@ -16,6 +16,8 @@ Implemented tests currently cover:
 - XML parser success and malformed-XML rejection
 - XML canonicalization stability
 - XSD normalization and XML-against-XSD validation
+- XML deterministic repair behavior
+- XML typed mapping behavior
 - grammar compiler output
 - richer normalized schema cases including nullable fields, enums, and nested constraints
 - recursive repair behavior for nested JSON objects and arrays
@@ -29,7 +31,7 @@ Implemented tests currently cover:
 
 Current local baseline:
 
-- `PYTHONPATH=src pytest -q` -> `37 passed`
+- `PYTHONPATH=src pytest -q` -> `41 passed`
 
 ## Test categories
 
@@ -103,7 +105,7 @@ Current local baseline:
 - corpus-level golden tests are still limited
 - live API reproducibility is not treated as a hard determinism proof
 - batch evaluation and stress harnesses are not implemented yet
-- strict XML typing and XML repair beyond no-op behavior are not implemented yet
+- broader XSD coverage and richer XML-specific typing policies are not implemented yet
 
 ## Constraints to note during implementation
 

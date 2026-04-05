@@ -97,15 +97,44 @@ def test_pipeline_end_to_end_success_xml() -> None:
     assert result.canonical_text == (PROJECT_ROOT / "goldens" / "demo.golden.xml").read_text(encoding="utf-8").strip()
     assert result.canonical_json is None
     assert result.typed_document == {
-        "tag": "record",
-        "attributes": {"priority": "2", "published": "true"},
-        "children": [
-            {"tag": "title", "text": "Demo title"},
-            {"tag": "summary", "text": "Short summary"},
-            {"tag": "tags"},
-        ],
+        "priority": 2,
+        "published": True,
+        "title": "Demo title",
+        "summary": "Short summary",
+        "tags": {},
     }
     manifest = json.loads(Path(result.manifest_path).read_text(encoding="utf-8"))
     assert manifest["omega"]["output_format"] == "xml"
     assert manifest["prompt_template"]["template_version"] == "v1"
     assert manifest["artifact_registry"]["prompt_template"]["fingerprint"]
+
+
+def test_pipeline_xml_repairs_repairable_output(tmp_path: Path) -> None:
+    repairable_xml = tmp_path / "repairable.xml"
+    repairable_xml.write_text(
+        '<record priority=" 2 " published="TRUE" extra="drop-me"><summary>Short summary</summary><title>Demo title</title><tags/><noise/></record>',
+        encoding="utf-8",
+    )
+
+    config_data = json.loads((PROJECT_ROOT / "configs" / "mock_run_xml.json").read_text(encoding="utf-8"))
+    config_data["input_id"] = "repairable-xml-run"
+    config_data["mock_response_path"] = str(repairable_xml)
+    config_path = tmp_path / "config.json"
+    config_path.write_text(json.dumps(config_data), encoding="utf-8")
+
+    config = load_run_config(config_path)
+    text = (PROJECT_ROOT / "examples" / "inputs" / "demo.txt").read_text(encoding="utf-8")
+
+    result = Pipeline().run(text, config)
+
+    assert result.ok is True
+    assert result.typed_document == {
+        "priority": 2,
+        "published": True,
+        "title": "Demo title",
+        "summary": "Short summary",
+        "tags": {},
+    }
+    assert any(action.action == "drop_unknown_attribute" for action in result.repairs)
+    assert any(action.action == "drop_unknown_field" for action in result.repairs)
+    assert any(action.action == "reorder_children" for action in result.repairs)
