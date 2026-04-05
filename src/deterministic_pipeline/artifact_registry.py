@@ -79,7 +79,7 @@ class ArtifactRegistry:
         )
 
     def resolve_prompt_template(self, run_config: RunConfig) -> ArtifactRecord:
-        payload = get_prompt_template_spec(run_config.prompt_template_version)
+        payload = get_prompt_template_spec(run_config.prompt_template_version, run_config.output_format)
         return ArtifactRecord(
             kind="prompt_template",
             artifact_id="prompt-template",

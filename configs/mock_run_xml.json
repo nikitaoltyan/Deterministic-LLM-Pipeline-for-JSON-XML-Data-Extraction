@@ -1,0 +1,11 @@
+{
+  "schema_id": "extraction-record-v1",
+  "schema_path": "schemas/extraction_record.schema.json",
+  "output_format": "xml",
+  "provider": {
+    "name": "mock",
+    "model": "mock-json-generator-v1"
+  },
+  "input_id": "demo-input-xml",
+  "mock_response_path": "examples/expected/demo.xml"
+}

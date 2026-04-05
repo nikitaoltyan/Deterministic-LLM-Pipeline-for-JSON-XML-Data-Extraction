@@ -3,22 +3,37 @@ from __future__ import annotations
 import json
 
 from deterministic_pipeline.contracts import PromptPackage
+from deterministic_pipeline.formats import StructuredFormat
 from deterministic_pipeline.reproducibility import sha256_json, sha256_text
 
 
-def get_prompt_template_spec(version: str) -> dict:
+def get_prompt_template_spec(version: str, output_format: StructuredFormat = StructuredFormat.JSON) -> dict:
     if version != "v1":
         raise ValueError("Unsupported prompt template version: {0}".format(version))
-    return {
-        "template_version": version,
-        "system_template": (
+    if output_format == StructuredFormat.JSON:
+        system_template = (
             "You produce JSON only. "
             "Return a single JSON document that follows the provided schema and required fields exactly."
-        ),
+        )
+        schema_label = "Schema"
+        grammar_label = "Grammar artifact"
+    elif output_format == StructuredFormat.XML:
+        system_template = (
+            "You produce XML only. "
+            "Return a single XML document with one root element that follows the provided structural constraints."
+        )
+        schema_label = "Source schema"
+        grammar_label = "XML runtime artifact"
+    else:
+        raise ValueError("Unsupported output format for prompt template: {0}".format(output_format.value))
+    return {
+        "template_version": version,
+        "output_format": output_format.value,
+        "system_template": system_template,
         "user_template_parts": {
             "prefix": "Input text:\n",
-            "schema_header": "\n\nSchema:\n",
-            "grammar_header": "\n\nGrammar artifact:\n",
+            "schema_header": f"\n\n{schema_label}:\n",
+            "grammar_header": f"\n\n{grammar_label}:\n",
         },
     }
 

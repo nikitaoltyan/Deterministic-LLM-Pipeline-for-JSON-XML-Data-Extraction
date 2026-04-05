@@ -3,7 +3,8 @@
 - The current MVP uses a `mock` provider adapter to keep determinism claims local and testable.
 - A real `openai_compatible` adapter is implemented behind the provider contract.
 - The core pipeline orchestration is now format-aware and delegates parser, validator, repair, canonicalization, and typing through a runtime strategy layer.
-- The currently implemented strategy set is JSON-only, but the contract layer now reserves `xml` as a first-class target format identifier for later implementation.
+- The JSON strategy set is fully implemented and the XML path now has a baseline runtime implementation with XML parsing, deterministic canonical serialization, no-op repair, baseline structural validation, and identity type mapping.
+- The XML baseline currently does not use XSD and does not yet provide strict XML-to-domain typing.
 - The grammar layer is now implemented as a normalized schema compiler that emits provider-specific structured output contracts.
 - The normalized schema artifact and grammar artifact are now built through separate explicit builder steps, which prepares the codebase for later capability modeling and strategy resolution.
 - Provider creation is now routed through an explicit registry rather than hardcoded branching in the factory path.

@@ -1,6 +1,6 @@
 # Architecture
 
-This document reflects the approved architecture, the currently implemented JSON-track baseline, and the first-stage generalization of the core pipeline contracts.
+This document reflects the approved architecture, the currently implemented JSON-track baseline, the generalized core pipeline contracts, and the first baseline XML runtime path.
 
 ## Architectural summary
 
@@ -20,10 +20,11 @@ Current implementation status:
 
 - generalized core contracts implemented
 - JSON strategy implementations implemented
+- baseline XML strategy implementations implemented for parsing, canonicalization, no-op repair, baseline validation, and identity type mapping
 - normalized JSON schema subset expanded for nullable fields, enums, and nested constraints
 - strict typing now fails explicitly on unsupported union/composition constructs
 - repair logic now recurses through nested JSON objects and arrays for formally safe transformations
-- XML declared as a target format identifier, but not implemented yet
+- XML runtime path implemented without XSD-aware validation yet
 
 ## Chosen formal-constraint strategy
 
@@ -230,6 +231,7 @@ Canonicalization rules:
 - normalized numeric formatting
 - normalized null/empty handling by explicit policy
 - fixed date/time normalization rules once date types are introduced
+- for XML baseline: deterministic XML declaration, stable attribute ordering, stable empty-element rendering, and normalized element text trimming
 
 Outputs:
 - canonical serialized representation
@@ -250,6 +252,11 @@ Outputs:
 
 Invariants:
 - Directly enforces `I3`
+
+Current XML baseline note:
+- JSON path uses schema-driven strict typing
+- XML path currently returns a deterministic structural tree representation
+- strict XML-to-application typing is deferred to the XSD-aware extension stage
 
 ### 10. Trace/report layer
 

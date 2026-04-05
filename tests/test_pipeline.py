@@ -84,3 +84,28 @@ def test_run_manifest_contains_stable_artifact_hashes() -> None:
     assert manifest["artifacts"]["source_schema_file_hash"]
     assert manifest["artifact_registry"]["schema"]["artifact_id"] == "extraction-record-v1"
     assert manifest["artifact_registry"]["grammar"]["artifact_id"] == "extraction-record-v1:schema-derived"
+
+
+def test_pipeline_end_to_end_success_xml() -> None:
+    config = load_run_config(PROJECT_ROOT / "configs" / "mock_run_xml.json")
+    text = (PROJECT_ROOT / "examples" / "inputs" / "demo.txt").read_text(encoding="utf-8")
+
+    result = Pipeline().run(text, config)
+
+    assert result.ok is True
+    assert result.output_format == "xml"
+    assert result.canonical_text == (PROJECT_ROOT / "goldens" / "demo.golden.xml").read_text(encoding="utf-8").strip()
+    assert result.canonical_json is None
+    assert result.typed_document == {
+        "tag": "record",
+        "attributes": {"priority": "2", "published": "true"},
+        "children": [
+            {"tag": "title", "text": "Demo title"},
+            {"tag": "summary", "text": "Short summary"},
+            {"tag": "tags"},
+        ],
+    }
+    manifest = json.loads(Path(result.manifest_path).read_text(encoding="utf-8"))
+    assert manifest["omega"]["output_format"] == "xml"
+    assert manifest["prompt_template"]["template_version"] == "v1"
+    assert manifest["artifact_registry"]["prompt_template"]["fingerprint"]

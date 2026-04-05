@@ -47,10 +47,18 @@
 - Completed Stage 3, substep 3: extracted deterministic structured-output strategy resolution into a standalone resolver and simplified provider transport logic.
 - Added tests for provider capabilities, structured-output strategy resolution, and the updated provider request path.
 
-## 2026-03-30 Stage 4 In Progress
+## 2026-03-30 Stage 4 Completed
 
 - Completed Stage 4, substep 1: introduced an explicit provider registry for adapter construction and removed hardcoded provider selection from the factory path.
 - Added registry tests for registered providers and unknown-provider failure handling.
 - Completed Stage 4, substep 2: added an `anthropic_compatible` provider family with explicit capability modeling and prompt-only structured-output resolution.
 - Added provider tests and an example config for the new transport family.
 - Completed Stage 4, substep 3: stabilized the provider layer by extracting shared transport and metadata helpers and reducing duplication across HTTP-backed adapters.
+
+## 2026-04-05
+
+- Completed Stage 5, substep 1: added the first baseline XML runtime path to the format-neutral pipeline.
+- Added XML parser, XML canonicalizer, baseline XML validator, baseline XML repairer, and baseline XML type mapper.
+- Extended the format runtime registry so `output_format=xml` now runs end-to-end through the pipeline.
+- Made prompt templates output-format-aware so the XML path no longer reuses JSON-only generation instructions.
+- Added XML mock config, XML fixture, XML golden output, parser/canonicalizer tests, and an end-to-end XML smoke test.
